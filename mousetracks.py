@@ -36,14 +36,16 @@ def largest_face(faces):
             selected = idx
     return faces[selected]
 
-def eyepos(img):
+def eyepos(img, highlight_idx):
     faces = detector(img, 0)
-    print(faces)
     if len(faces) == 0:
         return img
 
     face = largest_face(faces)
-    cv2.rectangle(img, (face.left(), face.top()), (face.right(), face.bottom()), (255, 255, 0), 2)
+    shape = predictor(img, face)
+    for (idx, p) in enumerate(shape.parts()):
+        clr = (255, 0, 0) if idx == highlight_idx else (255, 255, 0)
+        cv2.rectangle(img, (p.x-2, p.y-2), (p.x+2, p.y+2), clr, 2)
     return img
 
 
@@ -52,10 +54,18 @@ predictor = dlib.shape_predictor(download_predictor())
 
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
+    highlight_idx = 0
     while True:
         ret, img = cap.read()
-        img = eyepos(img)
+        img = eyepos(img, highlight_idx)
+        highlight_idx %= 68
+        cv2.putText(img, str(highlight_idx), (0, 25), cv2.FONT_HERSHEY_SCRIPT_COMPLEX, 1, (255, 255, 255))
         cv2.imshow('Output', img)
         key = cv2.waitKey(1)
-        if key != -1:
+        if key == 9: # tab
+            highlight_idx += 1
+        elif key == 98: # b
+            highlight_idx -= 1
+        elif key != -1:
+            print(key)
             break
