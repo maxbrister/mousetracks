@@ -74,7 +74,8 @@ class ClickOnOpen:
         (nose_dist, mouth_dist) = self.compute(face)
         ratio = mouth_dist / nose_dist
         diff = ratio - self.ratio
-        print(f'Ratio diff: {diff}')
+        if DEBUG:
+            print(f'Ratio diff: {diff}')
         down = diff > 0.01
 
         # Update the mouse state to match the mouth state
