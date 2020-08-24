@@ -73,7 +73,9 @@ class ClickOnOpen:
         # Determine the current nose/mouth ratio and compare it against the calibrated ratio
         (nose_dist, mouth_dist) = self.compute(face)
         ratio = mouth_dist / nose_dist
-        down = ratio - self.ratio > 0.01
+        diff = ratio - self.ratio
+        print(f'Ratio diff: {diff}')
+        down = diff > 0.01
 
         # Update the mouse state to match the mouth state
         if down != self.mouse_down:
@@ -134,14 +136,16 @@ class Debug68:
             print(key)
             sys.exit(0)
 
+DEBUG = False
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(download_predictor())
 
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
     funcs = [ClickOnOpen()]
-    if len(sys.argv) > 0 and sys.argv[0] in ['-d', '--debug']:
+    if len(sys.argv) > 1 and sys.argv[1] in ['-d', '--debug']:
         funcs.append(Debug68())
+        DEBUG = True
     print('Calibrating. Please keap mouth closed...')
     calibrating = True
     while True:
