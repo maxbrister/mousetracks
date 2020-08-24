@@ -36,28 +36,27 @@ def largest_face(faces):
             selected = idx
     return faces[selected]
 
-def eyepos(img, highlight_idx):
+def face_68(img):
     faces = detector(img, 0)
     if len(faces) == 0:
-        return img
+        return []
 
     face = largest_face(faces)
     shape = predictor(img, face)
-    for (idx, p) in enumerate(shape.parts()):
+    return shape.parts()
+
+def draw_68(img, highlight_idx):
+    shape = face_68(img)
+    for (idx, p) in enumerate(shape):
         clr = (255, 0, 0) if idx == highlight_idx else (255, 255, 0)
         cv2.rectangle(img, (p.x-2, p.y-2), (p.x+2, p.y+2), clr, 2)
     return img
 
-
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(download_predictor())
-
-if __name__ == '__main__':
-    cap = cv2.VideoCapture(0)
+def debug_68(cap):
     highlight_idx = 0
     while True:
         ret, img = cap.read()
-        img = eyepos(img, highlight_idx)
+        img = draw_68(img, highlight_idx)
         highlight_idx %= 68
         cv2.putText(img, str(highlight_idx), (0, 25), cv2.FONT_HERSHEY_SCRIPT_COMPLEX, 1, (255, 255, 255))
         cv2.imshow('Output', img)
@@ -69,3 +68,11 @@ if __name__ == '__main__':
         elif key != -1:
             print(key)
             break
+
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(download_predictor())
+
+if __name__ == '__main__':
+    cap = cv2.VideoCapture(0)
+    debug_68(cap)
+    cap.release()
